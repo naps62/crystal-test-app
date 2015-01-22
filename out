@@ -1,0 +1,48 @@
+; ModuleID = 'X'
+
+%String = type { i32, i32, i32, i8 }
+%X = type { i32, %"(Nil | (Int -> Nil) | (Int32 -> Nil))" }
+%"(Nil | (Int -> Nil) | (Int32 -> Nil))" = type { i32, [2 x i64] }
+%"->" = type { i8*, i8* }
+
+@symbol_table = external global [1 x %String*]
+
+define %X* @"*X::new:X"() {
+alloca:
+  %x = alloca %X*
+  br label %entry
+
+entry:                                            ; preds = %alloca
+  %0 = call i8* @__crystal_malloc(i32 ptrtoint (%X* getelementptr (%X* null, i32 1) to i32))
+  %1 = bitcast i8* %0 to %X*
+  %2 = bitcast %X* %1 to i8*
+  call void @llvm.memset.p0i8.i32(i8* %2, i8 0, i32 ptrtoint (%X* getelementptr (%X* null, i32 1) to i32), i32 4, i1 false)
+  %3 = getelementptr inbounds %X* %1, i32 0, i32 0
+  store i32 33, i32* %3
+  store %X* %1, %X** %x
+  %4 = load %X** %x
+  %5 = call i1 @"*GC::add_finalizer<X>:Nil"(%X* %4)
+  %6 = load %X** %x
+  ret %X* %6
+}
+
+declare i8* @__crystal_malloc(i32)
+
+; Function Attrs: nounwind
+declare void @llvm.memset.p0i8.i32(i8* nocapture, i8, i32, i32, i1) #0
+
+declare i1 @"*GC::add_finalizer<X>:Nil"(%X*)
+
+define i1 @"*X#fail_1<X, &(Int -> Nil)>:Nil"(%X* %self, %"->" %b) {
+alloca:
+
+entry:                                            ; No predecessors!
+  %0 = getelementptr inbounds %X* %self, i32 0, i32 1
+  %1 = getelementptr inbounds %"(Nil | (Int -> Nil) | (Int32 -> Nil))"* %0, i32 0, i32 0
+  store i32 157, i32* %1
+  %2 = getelementptr inbounds %"(Nil | (Int -> Nil) | (Int32 -> Nil))"* %0, i32 0, i32 1
+  %3 = bitcast [2 x i64]* %2 to %"->"*
+  store %"->" %b, %"->"* %3
+}
+
+attributes #0 = { nounwind }
