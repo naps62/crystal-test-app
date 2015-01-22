@@ -8,9 +8,9 @@ class View
           title { text "GB Pull Requests" }
         end
         body do
-          locals["items"].each do |item|
+          locals["pull_requests"].each do |item|
             div do
-              p { text item }
+              p { text item.title }
             end
           end
         end
@@ -18,5 +18,3 @@ class View
     end
   end
 end
-
-

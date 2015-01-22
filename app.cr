@@ -1,47 +1,35 @@
 require "frank"
-require "socket"
-require "signal"
-require "http/client"
-require "json/to_json"
 require "json"
 require "./view"
 
-# monkey patch. This
-class TCPServer
-  def initialize(port, backlog = 128)
-    @sock = C.socket(C::AF_INET, C::SOCK_STREAM, 0)
-
-    optval = 1
-    C.setsockopt(@sock, C::SOL_SOCKET, 2, pointerof(optval) as Void*, sizeof(Int32))
-
-    addr = C::SockAddrIn.new
-    addr.family = C::AF_INET
-    addr.addr = 0_u32
-    addr.port = C.htons(port)
-    if C.bind(@sock, pointerof(addr), 16) != 0
-      raise Errno.new("Error binding TCP server at #{port}")
-    end
-
-    if C.listen(@sock, backlog) != 0
-      raise Errno.new("Error listening TCP server at #{port}")
-    end
-  end
+class GithubPullRequest
+  json_mapping({
+    title: { type: String }
+  })
 end
 
+class GithubPullRequestCollection
+  json_mapping({
+    total_count: { type: Int32 },
+    items: { type: Array(GithubPullRequest) }
+  })
+end
 
-def pull_requests(query)
+def pull_requests
   client = HTTP::Client.new("hq.groupbuddies.com")
-  client.get("/github/pull_requests?query=is:open%20#{query}").body.to_json
+  client = HTTP::Client.new("hq.groupbuddies.com")
+  response = client.get("/github/pull_requests?q=is:open")
+  GithubPullRequestCollection.from_json(response.body)
 end
 
 
-get "/:query" do |context|
+get "/" do |context|
   context.response.content_type = "text/html"
-  View.new.render({ "items" => [1, 2, 3] })
   # query = context.request.params["query"]
+  prs = pull_requests
+  puts prs.total_count
+  View.new.render({ "pull_requests" => prs.items })
   # pull_requests(query)
   # params[:name]
   # "Hello World"
 end
-
-# Signal.trap(Signal::INT) { server.close; exit }
