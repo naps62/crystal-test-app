@@ -13,5 +13,5 @@ end
 get "/" do |context|
   context.response.content_type = "text/html"
   prs = pull_requests
-  Views::Index.new.render({ "pull_requests" => prs.items })
+  Views::Index.new prs.items
 end

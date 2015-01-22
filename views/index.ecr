@@ -1,0 +1,29 @@
+<doctype html>
+<html>
+  <head>
+    <title>GB Pull Requests</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap-theme.min.css">
+  </head>
+
+  <body>
+    <h1>Pull Requests</h1>
+
+    <% pull_requests.each do |item| %>
+      <div class="well row">
+        <div class="col-md-2">
+          <img src="<%= item.user.avatar_url %>" style="height: 100px">
+        </div>
+
+        <div class="col-md-6">
+          <h1><a href="<%= item.html_url %>"><%= item.title %></a></h1>
+          <h2><a href="<%= item.user.html_url %>"><%= item.user.login %></a></h2>
+        </div>
+
+        <div class="col-md-4">
+          <h2><%= item.comments %> comments</h2>
+        </div>
+      </div>
+    <% end %>
+  </body>
+</html>
